@@ -1,0 +1,1996 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Learning with Joseph | Interactive GES Hub (Grades 6–9)</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Plus Jakarta Sans & Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Plus Jakarta Sans', 'sans-serif'],
+          },
+          animation: {
+            'float': 'float 3s ease-in-out infinite',
+            'pulse-glow': 'pulseGlow 2s infinite',
+            'slide-up': 'slideUp 0.35s ease-out',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-6px)' },
+            },
+            pulseGlow: {
+              '0%, 100%': { boxShadow: '0 0 0 0 rgba(245, 158, 11, 0.45)' },
+              '50%': { boxShadow: '0 0 0 12px rgba(245, 158, 11, 0)' },
+            },
+            slideUp: {
+              '0%': { opacity: '0', transform: 'translateY(14px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background: linear-gradient(135deg, #f0f4ff 0%, #fdf2f8 50%, #fefce8 100%);
+      min-height: 100vh;
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.7);
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    /* Animated Lesson Stage */
+    @keyframes kenBurns {
+      0% { transform: scale(1) translate(0, 0); }
+      50% { transform: scale(1.06) translate(-1%, -1%); }
+      100% { transform: scale(1) translate(0, 0); }
+    }
+    .animate-stage {
+      animation: kenBurns 12s ease-in-out infinite;
+    }
+    .sound-bar {
+      animation: eq 0.6s ease-in-out infinite alternate;
+    }
+    @keyframes eq {
+      0% { height: 6px; }
+      100% { height: 24px; }
+    }
+  </style>
+</head>
+<body class="text-slate-800 antialiased selection:bg-indigo-600 selection:text-white">
+
+  <!-- ==================== GLOBAL TOAST / MESSAGE BOX ==================== -->
+  <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
+
+  <!-- ==================== AUTHENTICATION SCREEN ==================== -->
+  <div id="auth-screen" class="min-h-screen flex items-center justify-center p-4 sm:p-6">
+    <div class="max-w-5xl w-full grid grid-cols-1 lg:grid-cols-12 rounded-3xl overflow-hidden shadow-2xl bg-white border border-indigo-100">
+      
+      <!-- Left Hero Branding Panel -->
+      <div class="lg:col-span-5 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 p-8 sm:p-10 text-white flex flex-col justify-between relative overflow-hidden">
+        <div class="absolute -top-16 -right-16 w-48 h-48 bg-white/10 rounded-full blur-xl"></div>
+        <div class="absolute -bottom-16 -left-16 w-56 h-56 bg-amber-400/20 rounded-full blur-xl"></div>
+
+        <div>
+          <div class="inline-flex items-center gap-2 bg-white/20 backdrop-blur-md px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-6">
+            <i class="fa-solid fa-graduation-cap text-amber-300"></i> GES Curriculum • Grades 6–9
+          </div>
+          <h1 class="font-display text-3xl sm:text-4xl font-extrabold leading-tight mb-4">
+            Learning with <span class="text-amber-300">Joseph</span>
+          </h1>
+          <p class="text-indigo-100 text-sm sm:text-base leading-relaxed mb-6">
+            Empowering Ghanaian students with interactive video lessons, loud crystal-clear audio explanations, real ICT software simulators, and weekly rewards!
+          </p>
+
+          <!-- Live Student of the Week Preview on Login -->
+          <div id="auth-sotw-card" class="bg-white/15 backdrop-blur-md border border-white/25 rounded-2xl p-4">
+            <div class="flex items-center gap-3">
+              <div class="w-11 h-11 rounded-xl bg-amber-400 text-slate-900 flex items-center justify-center text-xl shadow-lg animate-float">
+                <i class="fa-solid fa-trophy"></i>
+              </div>
+              <div>
+                <p class="text-[11px] uppercase tracking-wider font-bold text-amber-200">Current Student of the Week</p>
+                <p id="auth-sotw-name" class="font-display font-bold text-base text-white">Ama Mensah (Grade 8)</p>
+                <p id="auth-sotw-pts" class="text-xs text-indigo-100">420 Points Earned</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-8 pt-6 border-t border-white/20 flex items-center justify-between text-xs text-indigo-100">
+          <span>Founded by <strong>Joseph Asiedu Amoah</strong></span>
+          <span class="bg-emerald-400/20 text-emerald-200 px-2.5 py-1 rounded-full font-semibold">100% Interactive</span>
+        </div>
+      </div>
+
+      <!-- Right Auth Forms Panel -->
+      <div class="lg:col-span-7 p-6 sm:p-10 flex flex-col justify-center">
+        <!-- Auth Mode Tabs -->
+        <div class="flex bg-slate-100 p-1.5 rounded-2xl mb-6">
+          <button onclick="switchAuthTab('student-login')" id="tab-student-login" class="flex-1 py-2.5 text-xs sm:text-sm font-bold rounded-xl bg-white text-indigo-600 shadow-sm transition-all">
+            <i class="fa-solid fa-user-graduate mr-1.5"></i>Student Login
+          </button>
+          <button onclick="switchAuthTab('student-register')" id="tab-student-register" class="flex-1 py-2.5 text-xs sm:text-sm font-bold rounded-xl text-slate-600 hover:text-slate-900 transition-all">
+            <i class="fa-solid fa-user-plus mr-1.5"></i>New Student ID
+          </button>
+          <button onclick="switchAuthTab('admin-login')" id="tab-admin-login" class="flex-1 py-2.5 text-xs sm:text-sm font-bold rounded-xl text-slate-600 hover:text-slate-900 transition-all">
+            <i class="fa-solid fa-shield-halved mr-1.5"></i>Admin Portal
+          </button>
+        </div>
+
+        <!-- 1. STUDENT LOGIN FORM -->
+        <form id="form-student-login" onsubmit="handleStudentLogin(event)" class="space-y-4 animate-slide-up">
+          <div>
+            <h2 class="font-display text-2xl font-bold text-slate-900">Welcome Back, Scholar!</h2>
+            <p class="text-sm text-slate-500">Enter your special Learning with Joseph username and password.</p>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold uppercase text-slate-600 mb-1.5">Special Student Username</label>
+            <div class="relative">
+              <i class="fa-solid fa-id-badge absolute left-3.5 top-3.5 text-indigo-500"></i>
+              <input type="text" id="login-student-user" required placeholder="e.g., LWJ-G8-1024" class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none text-sm font-medium uppercase" />
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold uppercase text-slate-600 mb-1.5">Special Password</label>
+            <div class="relative">
+              <i class="fa-solid fa-lock absolute left-3.5 top-3.5 text-indigo-500"></i>
+              <input type="password" id="login-student-pass" required placeholder="Enter your special password" class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none text-sm font-medium" />
+            </div>
+          </div>
+
+          <button type="submit" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold text-sm shadow-lg shadow-indigo-200 transition-all flex items-center justify-center gap-2">
+            <span>Enter Student Dashboards</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+
+          <!-- Instant Demo Student Button -->
+          <div class="pt-2 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <span class="text-xs text-slate-500">Want to explore right away?</span>
+            <button type="button" onclick="quickDemoLogin()" class="px-4 py-2 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-xs transition-all">
+              <i class="fa-solid fa-bolt text-amber-600 mr-1"></i> Instant Demo Student Login
+            </button>
+          </div>
+        </form>
+
+        <!-- 2. NEW STUDENT REGISTRATION FORM -->
+        <div id="form-student-register" class="hidden space-y-4 animate-slide-up">
+          <div>
+            <h2 class="font-display text-2xl font-bold text-slate-900">Get Your Special Student Pass</h2>
+            <p class="text-sm text-slate-500">Create your account to receive a unique username & password.</p>
+          </div>
+
+          <form onsubmit="handleStudentRegister(event)" class="space-y-4">
+            <div>
+              <label class="block text-xs font-bold uppercase text-slate-600 mb-1.5">Your Full Name</label>
+              <input type="text" id="reg-name" required placeholder="e.g., Kwame Boateng" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-pink-500 focus:ring-2 focus:ring-pink-200 outline-none text-sm font-medium" />
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold uppercase text-slate-600 mb-1.5">Select Your Class (Grade 6 – 9)</label>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <label class="cursor-pointer">
+                  <input type="radio" name="reg-grade" value="Grade 6" class="peer sr-only" checked />
+                  <div class="p-2.5 text-center rounded-xl border-2 border-slate-200 peer-checked:border-pink-600 peer-checked:bg-pink-50 peer-checked:text-pink-700 font-bold text-xs transition-all">Grade 6</div>
+                </label>
+                <label class="cursor-pointer">
+                  <input type="radio" name="reg-grade" value="Grade 7" class="peer sr-only" />
+                  <div class="p-2.5 text-center rounded-xl border-2 border-slate-200 peer-checked:border-pink-600 peer-checked:bg-pink-50 peer-checked:text-pink-700 font-bold text-xs transition-all">Grade 7</div>
+                </label>
+                <label class="cursor-pointer">
+                  <input type="radio" name="reg-grade" value="Grade 8" class="peer sr-only" />
+                  <div class="p-2.5 text-center rounded-xl border-2 border-slate-200 peer-checked:border-pink-600 peer-checked:bg-pink-50 peer-checked:text-pink-700 font-bold text-xs transition-all">Grade 8</div>
+                </label>
+                <label class="cursor-pointer">
+                  <input type="radio" name="reg-grade" value="Grade 9" class="peer sr-only" />
+                  <div class="p-2.5 text-center rounded-xl border-2 border-slate-200 peer-checked:border-pink-600 peer-checked:bg-pink-50 peer-checked:text-pink-700 font-bold text-xs transition-all">Grade 9</div>
+                </label>
+              </div>
+            </div>
+
+            <button type="submit" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-700 hover:to-rose-700 text-white font-bold text-sm shadow-lg shadow-pink-200 transition-all">
+              <i class="fa-solid fa-wand-magic-sparkles mr-1.5"></i> Generate Special Username & Password
+            </button>
+          </form>
+
+          <!-- Generated Credentials Box -->
+          <div id="generated-credentials-box" class="hidden p-4 rounded-2xl bg-emerald-50 border-2 border-emerald-400 space-y-3">
+            <div class="flex items-center gap-2 text-emerald-800 font-bold text-sm">
+              <i class="fa-solid fa-circle-check text-emerald-600 text-lg"></i>
+              <span>Account Created! Save Your Special Credentials:</span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+              <div class="bg-white p-2.5 rounded-xl border border-emerald-200">
+                <span class="text-slate-400 block font-semibold">SPECIAL USERNAME</span>
+                <span id="gen-username" class="font-mono font-extrabold text-sm text-indigo-700 select-all"></span>
+              </div>
+              <div class="bg-white p-2.5 rounded-xl border border-emerald-200">
+                <span class="text-slate-400 block font-semibold">SPECIAL PASSWORD</span>
+                <span id="gen-password" class="font-mono font-extrabold text-sm text-pink-700 select-all"></span>
+              </div>
+            </div>
+            <div class="flex gap-2">
+              <button type="button" onclick="copyGeneratedCredentials()" class="flex-1 py-2 rounded-xl bg-white border border-emerald-300 text-emerald-800 font-bold text-xs hover:bg-emerald-100 transition">
+                <i class="fa-solid fa-copy mr-1"></i> Copy Credentials
+              </button>
+              <button type="button" onclick="loginWithGenerated()" class="flex-1 py-2 rounded-xl bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-700 transition">
+                Log In Now <i class="fa-solid fa-arrow-right ml-1"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. ADMIN LOGIN FORM -->
+        <form id="form-admin-login" onsubmit="handleAdminLogin(event)" class="hidden space-y-4 animate-slide-up">
+          <div class="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0">
+              <i class="fa-solid fa-crown"></i>
+            </div>
+            <div>
+              <h2 class="font-display text-lg font-bold text-slate-900">Founder & Admin Control Center</h2>
+              <p class="text-xs text-slate-600">Exclusive access for Joseph Asiedu Amoah to monitor & post lessons.</p>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold uppercase text-slate-600 mb-1.5">Admin Username</label>
+            <input type="text" id="login-admin-user" required placeholder="LEARNING WITH JOSEPH" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none text-sm font-bold" />
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold uppercase text-slate-600 mb-1.5">Admin Password</label>
+            <input type="password" id="login-admin-pass" required placeholder="Enter Admin Password" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none text-sm font-bold" />
+          </div>
+
+          <button type="submit" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-slate-900 to-indigo-950 hover:from-black hover:to-indigo-900 text-amber-300 font-bold text-sm shadow-lg transition-all flex items-center justify-center gap-2">
+            <i class="fa-solid fa-shield-halved"></i>
+            <span>Unlock Admin Home Page</span>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== ADMIN HOME PAGE & CONTROL CENTER ==================== -->
+  <div id="admin-app" class="hidden min-h-screen flex flex-col">
+    <!-- Admin Top Navigation Bar -->
+    <header class="bg-slate-900 text-white sticky top-0 z-40 shadow-xl border-b border-slate-800">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 text-slate-950 flex items-center justify-center font-extrabold text-lg shadow-md">
+            <i class="fa-solid fa-crown"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="font-display font-extrabold text-base sm:text-lg tracking-tight text-white">LEARNING WITH JOSEPH</span>
+              <span class="px-2 py-0.5 text-[10px] font-extrabold uppercase rounded-full bg-amber-400 text-slate-950">ADMIN HOME</span>
+            </div>
+            <p class="text-xs text-slate-400">Welcome back, Joseph Asiedu Amoah • Full System Surveillance & Content Studio</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 sm:gap-3">
+          <button onclick="previewStudentModeFromAdmin()" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition flex items-center gap-1.5">
+            <i class="fa-solid fa-eye"></i> View Student Dashboards
+          </button>
+          <button onclick="logout()" class="px-3.5 py-2 rounded-xl bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/30 text-xs font-bold transition">
+            <i class="fa-solid fa-right-from-bracket mr-1"></i> Logout
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Admin Main Content -->
+    <main class="max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6 flex-1">
+      
+      <!-- Admin KPI Stats Row -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-xl">
+            <i class="fa-solid fa-users"></i>
+          </div>
+          <div>
+            <p class="text-xs font-bold uppercase text-slate-400">Total Students</p>
+            <p id="admin-stat-students" class="font-display text-2xl font-extrabold text-slate-900">0</p>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-xl">
+            <i class="fa-solid fa-radar"></i>
+          </div>
+          <div>
+            <p class="text-xs font-bold uppercase text-slate-400">Tracked Moments</p>
+            <p id="admin-stat-moments" class="font-display text-2xl font-extrabold text-slate-900">0</p>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-purple-100 text-purple-600 flex items-center justify-center text-xl">
+            <i class="fa-solid fa-video"></i>
+          </div>
+          <div>
+            <p class="text-xs font-bold uppercase text-slate-400">Published Lessons</p>
+            <p id="admin-stat-lessons" class="font-display text-2xl font-extrabold text-slate-900">0</p>
+          </div>
+        </div>
+
+        <div class="bg-gradient-to-r from-amber-400 to-orange-500 rounded-2xl p-5 shadow-md text-slate-950 flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-white/30 flex items-center justify-center text-xl">
+            <i class="fa-solid fa-trophy"></i>
+          </div>
+          <div class="min-w-0">
+            <p class="text-[11px] font-extrabold uppercase text-amber-950">Student of the Week</p>
+            <p id="admin-stat-sotw" class="font-display text-base font-extrabold truncate">Ama Mensah</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Admin 3-Column Control Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- 1. LIVE ACTIVITY & MOMENT TRACKER (5 cols) -->
+        <div class="lg:col-span-5 bg-white rounded-3xl shadow-sm border border-slate-200/80 flex flex-col overflow-hidden">
+          <div class="p-5 bg-slate-900 text-white flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+              <h2 class="font-display font-bold text-base">Live Moment & Activity Tracker</h2>
+            </div>
+            <button onclick="clearActivityLogs()" class="text-[11px] px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300">Clear Log</button>
+          </div>
+          <div class="p-3 bg-slate-50 border-b border-slate-200 text-xs text-slate-500 flex justify-between">
+            <span>Every login, video watch, audio play, quiz & ICT lab edit</span>
+            <span class="font-bold text-indigo-600">Real-Time</span>
+          </div>
+          <div id="admin-activity-feed" class="p-4 space-y-3 max-h-[540px] overflow-y-auto custom-scrollbar flex-1">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+
+        <!-- 2. POST EDUCATIONAL CONTENT (ADMIN ONLY) (4 cols) -->
+        <div class="lg:col-span-4 bg-white rounded-3xl shadow-sm border border-slate-200/80 p-5 sm:p-6">
+          <div class="flex items-center gap-2.5 mb-4">
+            <div class="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center">
+              <i class="fa-solid fa-bullhorn"></i>
+            </div>
+            <div>
+              <h2 class="font-display font-bold text-base text-slate-900">Post Educational Content</h2>
+              <p class="text-xs text-slate-500">Publish new video/audio lessons & assignments</p>
+            </div>
+          </div>
+
+          <form onsubmit="handleAdminPostContent(event)" class="space-y-3.5">
+            <div class="grid grid-cols-2 gap-2.5">
+              <div>
+                <label class="block text-[11px] font-bold uppercase text-slate-600 mb-1">Target Grade</label>
+                <select id="post-grade" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-xs font-bold bg-slate-50 focus:border-indigo-500 outline-none">
+                  <option value="Grade 6">Grade 6</option>
+                  <option value="Grade 7">Grade 7</option>
+                  <option value="Grade 8">Grade 8</option>
+                  <option value="Grade 9">Grade 9</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold uppercase text-slate-600 mb-1">GES Subject</label>
+                <select id="post-subject" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-xs font-bold bg-slate-50 focus:border-indigo-500 outline-none">
+                  <option value="English">English</option>
+                  <option value="Computing (ICT)">Computing (ICT)</option>
+                  <option value="Mathematics">Mathematics</option>
+                  <option value="Science">Science</option>
+                  <option value="Social Studies">Social Studies</option>
+                  <option value="History">History</option>
+                  <option value="Creative Art & Design">Creative Art & Design</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-bold uppercase text-slate-600 mb-1">Topic / Sub-strand Title</label>
+              <input type="text" id="post-topic" required placeholder="e.g., Formal Letter Writing Mastery" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium focus:border-indigo-500 outline-none" />
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-bold uppercase text-slate-600 mb-1">Video Explainer & Loud Audio Script</label>
+              <textarea id="post-script" rows="3" required placeholder="Write the lesson explanation that will play in the visual video stage and loud voice narrator..." class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-medium focus:border-indigo-500 outline-none"></textarea>
+            </div>
+
+            <div class="p-3 rounded-2xl bg-indigo-50/70 border border-indigo-100 space-y-2.5">
+              <p class="text-[11px] font-extrabold uppercase text-indigo-800"><i class="fa-solid fa-clipboard-question mr-1"></i> Post-Video Assignment Question</p>
+              <input type="text" id="post-question" required placeholder="Enter assignment question..." class="w-full px-3 py-2 rounded-xl border border-indigo-200 bg-white text-xs outline-none" />
+              <div class="grid grid-cols-2 gap-2">
+                <input type="text" id="post-opt-a" required placeholder="Option A (Correct)" class="px-2.5 py-1.5 rounded-lg border border-emerald-300 bg-emerald-50/50 text-xs" />
+                <input type="text" id="post-opt-b" required placeholder="Option B" class="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white text-xs" />
+                <input type="text" id="post-opt-c" required placeholder="Option C" class="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white text-xs" />
+                <input type="text" id="post-opt-d" required placeholder="Option D" class="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white text-xs" />
+              </div>
+              <p class="text-[10px] text-slate-500">* Option A is automatically set as the correct answer (options shuffle for students).</p>
+            </div>
+
+            <button type="submit" class="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold text-xs shadow-md transition">
+              <i class="fa-solid fa-paper-plane mr-1.5"></i> Publish Lesson to All Students
+            </button>
+          </form>
+        </div>
+
+        <!-- 3. STUDENT ROSTER & WEEKLY AWARD DECLARATION (3 cols) -->
+        <div class="lg:col-span-3 bg-white rounded-3xl shadow-sm border border-slate-200/80 p-5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center gap-2 mb-3">
+              <div class="w-9 h-9 rounded-xl bg-amber-500 text-white flex items-center justify-center">
+                <i class="fa-solid fa-award"></i>
+              </div>
+              <div>
+                <h2 class="font-display font-bold text-base text-slate-900">Student of the Week</h2>
+                <p class="text-xs text-slate-500">Declare winner visible to all</p>
+              </div>
+            </div>
+
+            <div class="p-3.5 rounded-2xl bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 mb-4">
+              <p class="text-[11px] font-bold uppercase text-amber-800">Active Weekly Champion</p>
+              <p id="admin-sotw-display" class="font-display font-extrabold text-sm text-slate-900 mt-0.5">Ama Mensah (Grade 8)</p>
+              <button onclick="autoDeclareTopStudent()" class="mt-2.5 w-full py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs shadow-sm transition">
+                <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Auto-Declare Highest Scorer
+              </button>
+            </div>
+
+            <h3 class="text-xs font-extrabold uppercase text-slate-500 mb-2">Registered Students & Credentials</h3>
+            <div id="admin-student-list" class="space-y-2.5 max-h-[340px] overflow-y-auto custom-scrollbar">
+              <!-- Populated dynamically -->
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- ==================== STUDENT APPLICATION (3 DASHBOARDS) ==================== -->
+  <div id="student-app" class="hidden min-h-screen flex flex-col">
+    
+    <!-- Student Top Header -->
+    <header class="bg-white/90 backdrop-blur-md sticky top-0 z-40 border-b border-indigo-100 shadow-sm">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
+        <!-- Brand -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 text-white flex items-center justify-center font-display font-extrabold text-lg shadow-md">
+            LJ
+          </div>
+          <div>
+            <h1 class="font-display font-extrabold text-base sm:text-lg bg-gradient-to-r from-indigo-700 via-purple-700 to-pink-600 bg-clip-text text-transparent">
+              Learning with Joseph
+            </h1>
+            <p class="text-[11px] text-slate-500 font-medium">GES Interactive Portal • <span id="header-student-grade" class="text-indigo-600 font-bold">Grade 8</span></p>
+          </div>
+        </div>
+
+        <!-- User Points & Profile Pill -->
+        <div class="flex items-center gap-2 sm:gap-3">
+          <!-- Admin Return Button (Only shown when Admin previews student mode) -->
+          <button id="return-admin-btn" onclick="returnToAdminHome()" class="hidden px-3 py-1.5 rounded-xl bg-slate-900 text-amber-300 text-xs font-bold hover:bg-slate-800 transition">
+            <i class="fa-solid fa-crown mr-1"></i> Admin Home
+          </button>
+
+          <div class="flex items-center gap-2 bg-gradient-to-r from-amber-100 to-yellow-100 border border-amber-300 px-3.5 py-1.5 rounded-2xl">
+            <i class="fa-solid fa-star text-amber-500 animate-spin" style="animation-duration: 8s;"></i>
+            <div>
+              <span id="header-student-points" class="font-display font-extrabold text-sm text-amber-900">0</span>
+              <span class="text-[11px] font-bold text-amber-700">PTS</span>
+            </div>
+          </div>
+
+          <div class="hidden sm:flex items-center gap-2 bg-indigo-50 px-3 py-1.5 rounded-2xl border border-indigo-100">
+            <div class="w-7 h-7 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-bold" id="header-student-avatar">S</div>
+            <div class="text-xs">
+              <p id="header-student-name" class="font-bold text-slate-800 leading-none">Student</p>
+              <p id="header-student-id" class="text-[10px] font-mono text-indigo-600 mt-0.5">LWJ-ID</p>
+            </div>
+          </div>
+
+          <button onclick="logout()" title="Logout" class="p-2.5 rounded-xl bg-slate-100 hover:bg-rose-100 text-slate-600 hover:text-rose-600 transition">
+            <i class="fa-solid fa-right-from-bracket"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- 3 MAIN DASHBOARD NAVIGATION TABS -->
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 pb-3">
+        <nav class="grid grid-cols-3 gap-2 sm:gap-4 bg-slate-100/90 p-1.5 rounded-2xl">
+          <button onclick="switchStudentDashboard(1)" id="nav-dash-1" class="py-2.5 px-3 rounded-xl font-display font-bold text-xs sm:text-sm flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md transition-all">
+            <i class="fa-solid fa-book-open-reader"></i>
+            <span>1. Learning Hub</span>
+          </button>
+          <button onclick="switchStudentDashboard(2)" id="nav-dash-2" class="py-2.5 px-3 rounded-xl font-display font-bold text-xs sm:text-sm flex items-center justify-center gap-2 text-slate-600 hover:bg-white/70 transition-all">
+            <i class="fa-solid fa-laptop-code"></i>
+            <span>2. ICT Software Lab</span>
+          </button>
+          <button onclick="switchStudentDashboard(3)" id="nav-dash-3" class="py-2.5 px-3 rounded-xl font-display font-bold text-xs sm:text-sm flex items-center justify-center gap-2 text-slate-600 hover:bg-white/70 transition-all">
+            <i class="fa-solid fa-trophy"></i>
+            <span>3. Awards & About Joseph</span>
+          </button>
+        </nav>
+      </div>
+    </header>
+
+    <!-- GLOBAL STUDENT OF THE WEEK CELEBRATION BANNER (Visible to Everyone) -->
+    <div class="max-w-7xl w-full mx-auto px-4 sm:px-6 pt-4">
+      <div class="rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-pink-500 p-3.5 sm:p-4 text-white shadow-lg flex flex-wrap items-center justify-between gap-3 animate-pulse-glow">
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-2xl bg-white text-amber-500 flex items-center justify-center text-2xl shadow-md shrink-0">
+            <i class="fa-solid fa-crown"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded-full bg-black/25 text-[10px] font-extrabold uppercase tracking-wider">Official Weekly Announcement</span>
+              <span class="text-xs font-bold text-amber-100 hidden sm:inline">• Visible to All Accounts</span>
+            </div>
+            <p class="font-display font-extrabold text-sm sm:text-base mt-0.5">
+              Student of the Week: <span id="banner-sotw-name" class="underline decoration-amber-200 decoration-2">Ama Mensah (Grade 8)</span> — <span id="banner-sotw-points">420 pts</span>!
+            </p>
+          </div>
+        </div>
+        <button onclick="switchStudentDashboard(3)" class="px-3.5 py-1.5 rounded-xl bg-white text-orange-600 font-extrabold text-xs hover:bg-amber-50 transition shadow-sm">
+          View Leaderboard <i class="fa-solid fa-arrow-right ml-1"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- ==================== DASHBOARD 1: STUDENT LEARNING HUB ==================== -->
+    <section id="student-dash-1" class="max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6 flex-1 animate-slide-up">
+      
+      <!-- Grade 6 to Grade 9 Selector Bar -->
+      <div class="bg-white rounded-3xl p-5 shadow-sm border border-indigo-100">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+          <div>
+            <h2 class="font-display font-extrabold text-lg sm:text-xl text-slate-900">Choose Your Class (Grades 6 – 9)</h2>
+            <p class="text-xs text-slate-500">Select a class level to explore Ghana Education Service (GES) subjects, watch video explainers & earn points.</p>
+          </div>
+          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200">
+            <i class="fa-solid fa-volume-high"></i> Loud Auto-Audio Enabled
+          </span>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3" id="grade-selector-grid">
+          <button onclick="selectGrade('Grade 6')" data-grade="Grade 6" class="grade-btn p-3.5 rounded-2xl border-2 border-slate-200 hover:border-indigo-400 font-display font-extrabold text-sm transition-all flex items-center justify-between">
+            <span>Grade 6</span>
+            <span class="text-xs px-2 py-0.5 rounded-lg bg-indigo-100 text-indigo-700">Basic 6</span>
+          </button>
+          <button onclick="selectGrade('Grade 7')" data-grade="Grade 7" class="grade-btn p-3.5 rounded-2xl border-2 border-slate-200 hover:border-purple-400 font-display font-extrabold text-sm transition-all flex items-center justify-between">
+            <span>Grade 7</span>
+            <span class="text-xs px-2 py-0.5 rounded-lg bg-purple-100 text-purple-700">JHS 1</span>
+          </button>
+          <button onclick="selectGrade('Grade 8')" data-grade="Grade 8" class="grade-btn p-3.5 rounded-2xl border-2 border-slate-200 hover:border-pink-400 font-display font-extrabold text-sm transition-all flex items-center justify-between">
+            <span>Grade 8</span>
+            <span class="text-xs px-2 py-0.5 rounded-lg bg-pink-100 text-pink-700">JHS 2</span>
+          </button>
+          <button onclick="selectGrade('Grade 9')" data-grade="Grade 9" class="grade-btn p-3.5 rounded-2xl border-2 border-slate-200 hover:border-amber-400 font-display font-extrabold text-sm transition-all flex items-center justify-between">
+            <span>Grade 9</span>
+            <span class="text-xs px-2 py-0.5 rounded-lg bg-amber-100 text-amber-700">JHS 3 / BECE</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- GES Subjects Grid -->
+      <div>
+        <h3 class="font-display font-extrabold text-base text-slate-800 mb-3 flex items-center gap-2">
+          <i class="fa-solid fa-layer-group text-indigo-600"></i>
+          <span>GES Curriculum Subjects for <span id="selected-grade-label" class="text-indigo-600">Grade 8</span></span>
+        </h3>
+        <div id="subjects-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- Subject Cards injected via JS -->
+        </div>
+      </div>
+
+      <!-- Topics & Interactive Video/Audio Lesson Player Area -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Left: Topics List for Selected Subject (5 cols) -->
+        <div class="lg:col-span-5 bg-white rounded-3xl p-5 shadow-sm border border-slate-200/80 space-y-3">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div>
+              <span id="active-subject-badge" class="text-[11px] font-extrabold uppercase px-2.5 py-1 rounded-full bg-indigo-100 text-indigo-700">English</span>
+              <h3 class="font-display font-extrabold text-lg text-slate-900 mt-1" id="active-subject-title">English Language Topics</h3>
+            </div>
+            <i id="active-subject-icon" class="fa-solid fa-book text-2xl text-indigo-500"></i>
+          </div>
+
+          <div id="topics-list" class="space-y-2.5">
+            <!-- Topics injected via JS -->
+          </div>
+        </div>
+
+        <!-- Right: Interactive Video Stage + Loud Audio + Post-Video Assignment (7 cols) -->
+        <div class="lg:col-span-7 bg-white rounded-3xl shadow-md border border-indigo-100 overflow-hidden flex flex-col">
+          
+          <!-- Video Stage Header -->
+          <div class="p-4 sm:p-5 bg-slate-900 text-white flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <span id="lesson-grade-sub-tag" class="text-[11px] font-bold uppercase text-amber-400">Grade 8 • English</span>
+              <h3 id="lesson-player-title" class="font-display font-extrabold text-base sm:text-lg">Select a Topic to Start Video & Audio Lesson</h3>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="replayLoudAudio()" id="btn-loud-audio" class="px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs flex items-center gap-1.5 shadow transition">
+                <i class="fa-solid fa-volume-high"></i> Max Loud Audio (100%)
+              </button>
+              <button onclick="stopAudioNarration()" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs" title="Stop Audio">
+                <i class="fa-solid fa-stop"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Animated Visual Video Presentation Screen -->
+          <div class="relative bg-gradient-to-br from-indigo-950 via-purple-900 to-slate-900 min-h-[260px] sm:min-h-[300px] p-6 flex flex-col justify-between text-white overflow-hidden">
+            <div class="absolute inset-0 opacity-20 animate-stage pointer-events-none" style="background-image: radial-gradient(#fbbf24 1.5px, transparent 1.5px); background-size: 24px 24px;"></div>
+            
+            <!-- Top Live Audio Visualizer -->
+            <div class="relative z-10 flex items-center justify-between">
+              <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-600/90 text-[11px] font-bold uppercase tracking-wider">
+                <span class="w-2 h-2 rounded-full bg-white animate-ping"></span> Interactive Video Lesson
+              </span>
+              <div id="audio-visualizer" class="flex items-end gap-1 h-6 opacity-40">
+                <span class="w-1 bg-amber-400 rounded-full sound-bar" style="animation-delay: 0.1s"></span>
+                <span class="w-1 bg-emerald-400 rounded-full sound-bar" style="animation-delay: 0.3s"></span>
+                <span class="w-1 bg-pink-400 rounded-full sound-bar" style="animation-delay: 0.2s"></span>
+                <span class="w-1 bg-cyan-400 rounded-full sound-bar" style="animation-delay: 0.4s"></span>
+                <span class="w-1 bg-amber-400 rounded-full sound-bar" style="animation-delay: 0.15s"></span>
+              </div>
+            </div>
+
+            <!-- Center Slide Content -->
+            <div class="relative z-10 my-4 space-y-3">
+              <div id="video-visual-badge" class="inline-block px-3 py-1 rounded-lg bg-white/15 text-amber-300 text-xs font-bold">
+                <i class="fa-solid fa-chalkboard-user mr-1"></i> Teacher Joseph's Visual Board
+              </div>
+              <p id="video-caption-text" class="font-display text-base sm:text-xl font-bold leading-relaxed text-white">
+                Click any topic on the left to watch the animated explainer video and hear the loud automatic audio lesson!
+              </p>
+              <div id="video-key-points" class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2"></div>
+            </div>
+
+            <!-- Video Progress Bar & Complete Watch Button -->
+            <div class="relative z-10 space-y-2">
+              <div class="w-full h-2 bg-white/20 rounded-full overflow-hidden">
+                <div id="video-progress-bar" class="h-full bg-gradient-to-r from-amber-400 to-emerald-400 w-0 transition-all duration-300"></div>
+              </div>
+              <div class="flex items-center justify-between text-xs">
+                <span id="video-status-text" class="text-indigo-200">Ready to play lesson</span>
+                <button onclick="markVideoWatched()" id="btn-complete-video" class="px-4 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-xs shadow transition">
+                  <i class="fa-solid fa-check-circle mr-1"></i> Finish Video & Unlock Assignment (+25 pts)
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Post-Video Assignment Box -->
+          <div id="assignment-section" class="p-5 sm:p-6 bg-slate-50 border-t border-slate-200">
+            <div id="assignment-locked-msg" class="text-center py-4 space-y-2">
+              <div class="w-11 h-11 rounded-2xl bg-slate-200 text-slate-500 flex items-center justify-center mx-auto text-lg">
+                <i class="fa-solid fa-lock"></i>
+              </div>
+              <p class="font-display font-bold text-sm text-slate-700">Post-Video Assignment Locked</p>
+              <p class="text-xs text-slate-500">Watch the video lesson above (or click "Finish Video") to unlock your graded assignment and earn +50 points!</p>
+            </div>
+
+            <div id="assignment-unlocked-box" class="hidden space-y-4">
+              <div class="flex items-center justify-between">
+                <span class="px-3 py-1 rounded-full bg-purple-100 text-purple-800 font-extrabold text-xs">
+                  <i class="fa-solid fa-pen-to-square mr-1"></i> Topic Assignment (+50 Points)
+                </span>
+                <span class="text-xs font-bold text-emerald-600">Video Completed ✓</span>
+              </div>
+              <p id="assignment-question-text" class="font-display font-bold text-base text-slate-900"></p>
+              <div id="assignment-options-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5"></div>
+              <div id="assignment-feedback" class="hidden p-3.5 rounded-2xl text-xs font-bold"></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== DASHBOARD 2: INTERACTIVE ICT SOFTWARE LAB ==================== -->
+    <section id="student-dash-2" class="hidden max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6 flex-1 animate-slide-up">
+      <div class="bg-white rounded-3xl p-5 sm:p-6 shadow-sm border border-indigo-100">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+          <div>
+            <span class="px-3 py-1 rounded-full bg-cyan-100 text-cyan-800 text-xs font-extrabold uppercase">GES Computing Practical Lab</span>
+            <h2 class="font-display font-extrabold text-xl sm:text-2xl text-slate-900 mt-1">Hands-On Office Software Simulator</h2>
+            <p class="text-xs sm:text-sm text-slate-500">Practice MS Word, Presentation Software (PowerPoint), and Spreadsheets (Excel) right inside Learning with Joseph!</p>
+          </div>
+          <!-- Software Switcher Buttons -->
+          <div class="flex flex-wrap gap-2">
+            <button onclick="switchIctApp('word')" id="ict-tab-word" class="px-4 py-2.5 rounded-xl bg-blue-600 text-white font-bold text-xs sm:text-sm shadow flex items-center gap-2 transition">
+              <i class="fa-solid fa-file-word"></i> MS Word
+            </button>
+            <button onclick="switchIctApp('ppt')" id="ict-tab-ppt" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-orange-100 text-slate-700 font-bold text-xs sm:text-sm flex items-center gap-2 transition">
+              <i class="fa-solid fa-file-powerpoint text-orange-600"></i> PowerPoint
+            </button>
+            <button onclick="switchIctApp('excel')" id="ict-tab-excel" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-emerald-100 text-slate-700 font-bold text-xs sm:text-sm flex items-center gap-2 transition">
+              <i class="fa-solid fa-file-excel text-emerald-600"></i> Spreadsheets
+            </button>
+          </div>
+        </div>
+
+        <!-- 1. MS WORD SIMULATOR -->
+        <div id="ict-app-word" class="mt-5 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2 bg-blue-50 p-3 rounded-2xl border border-blue-200">
+            <div class="flex flex-wrap items-center gap-1.5">
+              <button onclick="execWordCmd('bold')" class="w-9 h-9 rounded-lg bg-white hover:bg-blue-600 hover:text-white font-bold text-sm border border-blue-200 shadow-sm">B</button>
+              <button onclick="execWordCmd('italic')" class="w-9 h-9 rounded-lg bg-white hover:bg-blue-600 hover:text-white italic font-serif text-sm border border-blue-200 shadow-sm">I</button>
+              <button onclick="execWordCmd('underline')" class="w-9 h-9 rounded-lg bg-white hover:bg-blue-600 hover:text-white underline text-sm border border-blue-200 shadow-sm">U</button>
+              <button onclick="execWordCmd('justifyLeft')" class="w-9 h-9 rounded-lg bg-white hover:bg-blue-600 hover:text-white text-xs border border-blue-200 shadow-sm"><i class="fa-solid fa-align-left"></i></button>
+              <button onclick="execWordCmd('justifyCenter')" class="w-9 h-9 rounded-lg bg-white hover:bg-blue-600 hover:text-white text-xs border border-blue-200 shadow-sm"><i class="fa-solid fa-align-center"></i></button>
+              <button onclick="execWordCmd('insertUnorderedList')" class="w-9 h-9 rounded-lg bg-white hover:bg-blue-600 hover:text-white text-xs border border-blue-200 shadow-sm"><i class="fa-solid fa-list-ul"></i></button>
+              <select onchange="execWordCmd('fontSize', this.value)" class="px-2.5 py-2 rounded-lg bg-white border border-blue-200 text-xs font-bold">
+                <option value="3">Normal Size</option>
+                <option value="5">Heading Large</option>
+                <option value="6">Title Extra Large</option>
+              </select>
+            </div>
+            <button onclick="submitIctPractice('MS Word Document')" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow">
+              <i class="fa-solid fa-cloud-arrow-up mr-1"></i> Save & Submit Work (+30 pts)
+            </button>
+          </div>
+
+          <div class="bg-slate-200/70 p-4 sm:p-8 rounded-2xl">
+            <div id="word-editor-page" contenteditable="true" class="max-w-3xl mx-auto min-h-[300px] bg-white p-6 sm:p-10 rounded-xl shadow-md outline-none text-slate-800 leading-relaxed">
+              <h2 style="font-size: 22px; font-weight: bold; color: #1e3a8a;">APPLICATION FOR SCHOOL PREFECT</h2>
+              <p><br></p>
+              <p>The Headteacher,<br>Learning with Joseph Junior High School,<br>Accra - Ghana.</p>
+              <p><br></p>
+              <p>Dear Sir/Madam,</p>
+              <p><strong><u>APPLICATION FOR THE POST OF ICT PREFECT</u></strong></p>
+              <p>I am writing to apply for the position of ICT Prefect. Edit this document using the formatting toolbar above to practice MS Word skills!</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. PRESENTATION SOFTWARE (POWERPOINT) SIMULATOR -->
+        <div id="ict-app-ppt" class="hidden mt-5 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2 bg-orange-50 p-3 rounded-2xl border border-orange-200">
+            <div class="flex flex-wrap items-center gap-2">
+              <button onclick="addPptSlide()" class="px-3.5 py-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs">
+                <i class="fa-solid fa-plus mr-1"></i> New Slide
+              </button>
+              <span class="text-xs font-bold text-slate-600">Theme:</span>
+              <button onclick="setPptTheme('from-indigo-600 to-purple-700 text-white')" class="w-6 h-6 rounded-full bg-indigo-600 border-2 border-white shadow"></button>
+              <button onclick="setPptTheme('from-emerald-600 to-teal-700 text-white')" class="w-6 h-6 rounded-full bg-emerald-600 border-2 border-white shadow"></button>
+              <button onclick="setPptTheme('from-amber-400 to-orange-500 text-slate-950')" class="w-6 h-6 rounded-full bg-amber-400 border-2 border-white shadow"></button>
+              <button onclick="setPptTheme('from-slate-900 to-slate-800 text-white')" class="w-6 h-6 rounded-full bg-slate-900 border-2 border-white shadow"></button>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="togglePptSlideshow()" class="px-3.5 py-2 rounded-xl bg-slate-900 text-amber-300 font-bold text-xs">
+                <i class="fa-solid fa-play mr-1"></i> Present Slideshow
+              </button>
+              <button onclick="submitIctPractice('PowerPoint Presentation')" class="px-3.5 py-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs">
+                Submit Deck (+30 pts)
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+            <!-- Slide Thumbnails -->
+            <div id="ppt-thumbnails" class="md:col-span-3 space-y-2 max-h-[320px] overflow-y-auto custom-scrollbar"></div>
+            <!-- Active Slide Canvas -->
+            <div class="md:col-span-9">
+              <div id="ppt-canvas" class="rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-700 text-white p-8 sm:p-12 min-h-[300px] shadow-lg flex flex-col justify-center space-y-4">
+                <input id="ppt-slide-title" oninput="updateCurrentSlide()" class="bg-transparent border-b border-white/30 font-display font-extrabold text-2xl sm:text-3xl outline-none placeholder-white/60" value="Importance of Computing in Ghana" />
+                <textarea id="ppt-slide-body" oninput="updateCurrentSlide()" rows="4" class="bg-transparent font-medium text-sm sm:text-base outline-none resize-none placeholder-white/70">• Enhances research and digital literacy&#10;• Connects students to global knowledge&#10;• Builds future software engineers</textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. SPREADSHEETS (EXCEL) SIMULATOR -->
+        <div id="ict-app-excel" class="hidden mt-5 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2 bg-emerald-50 p-3 rounded-2xl border border-emerald-200">
+            <div class="flex items-center gap-2 text-xs">
+              <span class="px-2.5 py-1.5 rounded-lg bg-emerald-600 text-white font-bold">fx Formula Bar</span>
+              <span class="text-slate-600 font-medium">Supports numbers & formulas like <code class="bg-white px-1.5 py-0.5 rounded border font-bold text-emerald-800">=SUM(B1:B3)</code></span>
+            </div>
+            <div class="flex gap-2">
+              <button onclick="recalculateSheet()" class="px-3.5 py-2 rounded-xl bg-white border border-emerald-300 text-emerald-800 font-bold text-xs hover:bg-emerald-100">
+                <i class="fa-solid fa-calculator mr-1"></i> Calculate Formulas
+              </button>
+              <button onclick="submitIctPractice('Spreadsheet Worksheet')" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow">
+                Submit Sheet (+30 pts)
+              </button>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto rounded-2xl border border-slate-200">
+            <table class="w-full text-xs sm:text-sm border-collapse bg-white" id="excel-grid">
+              <thead>
+                <tr class="bg-slate-100 text-slate-600 font-bold">
+                  <th class="border border-slate-200 p-2 w-12 text-center">#</th>
+                  <th class="border border-slate-200 p-2">A (Subject)</th>
+                  <th class="border border-slate-200 p-2">B (Test 1)</th>
+                  <th class="border border-slate-200 p-2">C (Test 2)</th>
+                  <th class="border border-slate-200 p-2">D (Total Formula)</th>
+                </tr>
+              </thead>
+              <tbody id="excel-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== DASHBOARD 3: STUDENT OF THE WEEK, LEADERBOARD & ABOUT JOSEPH ==================== -->
+    <section id="student-dash-3" class="hidden max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6 flex-1 animate-slide-up">
+      
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Left: Student of the Week & Points Leaderboard (6 cols) -->
+        <div class="lg:col-span-6 space-y-6">
+          <!-- Trophy Spotlight Card -->
+          <div class="rounded-3xl bg-gradient-to-br from-amber-400 via-orange-500 to-rose-500 p-6 text-white shadow-xl relative overflow-hidden">
+            <div class="absolute -right-8 -bottom-8 text-9xl text-white/15 rotate-12">
+              <i class="fa-solid fa-trophy"></i>
+            </div>
+            <span class="px-3 py-1 rounded-full bg-black/25 text-xs font-extrabold uppercase tracking-wider">Weekly Honor Roll</span>
+            <h2 class="font-display font-extrabold text-2xl sm:text-3xl mt-3">Student of the Week</h2>
+            <div class="mt-4 bg-white/20 backdrop-blur-md rounded-2xl p-4 border border-white/30 flex items-center gap-4">
+              <div class="w-14 h-14 rounded-2xl bg-white text-amber-500 flex items-center justify-center text-3xl shadow-md shrink-0">
+                <i class="fa-solid fa-crown"></i>
+              </div>
+              <div>
+                <p id="dash3-sotw-name" class="font-display font-extrabold text-xl">Ama Mensah (Grade 8)</p>
+                <p id="dash3-sotw-pts" class="text-sm font-bold text-amber-100">420 Points Earned This Week</p>
+                <p class="text-xs text-white/90 mt-1">Celebrated across the entire Learning with Joseph community!</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Leaderboard & How Points Work -->
+          <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200/80 space-y-4">
+            <div class="flex items-center justify-between">
+              <h3 class="font-display font-extrabold text-lg text-slate-900"><i class="fa-solid fa-ranking-star text-indigo-600 mr-2"></i>Top Scholars Leaderboard</h3>
+              <span class="text-xs font-bold text-slate-400">Live Rankings</span>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-[11px] font-bold">
+              <div class="p-2 rounded-xl bg-indigo-50 text-indigo-700">+10 pts Login</div>
+              <div class="p-2 rounded-xl bg-purple-50 text-purple-700">+25 pts Video</div>
+              <div class="p-2 rounded-xl bg-emerald-50 text-emerald-700">+50 pts Quiz</div>
+              <div class="p-2 rounded-xl bg-amber-50 text-amber-800">+30 pts ICT Lab</div>
+            </div>
+
+            <div id="student-leaderboard-list" class="space-y-2.5">
+              <!-- Populated via JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: ABOUT JOSEPH ASIEDU AMOAH (6 cols) -->
+        <div class="lg:col-span-6 bg-white rounded-3xl shadow-sm border border-indigo-100 overflow-hidden flex flex-col">
+          <div class="bg-gradient-to-r from-indigo-700 via-purple-700 to-pink-600 p-6 sm:p-8 text-white">
+            <span class="px-3 py-1 rounded-full bg-white/20 text-xs font-extrabold uppercase tracking-wider">About the Founder</span>
+            <h2 class="font-display font-extrabold text-2xl sm:text-3xl mt-3">Joseph Asiedu Amoah</h2>
+            <p class="text-indigo-100 text-sm font-semibold mt-1">Visionary Educator, Innovator & Founder of Learning with Joseph</p>
+          </div>
+
+          <div class="p-6 sm:p-8 space-y-5 flex-1">
+            <p class="text-sm sm:text-base text-slate-700 leading-relaxed">
+              <strong>Joseph Asiedu Amoah</strong> created <em>Learning with Joseph</em> with one inspiring mission: to make quality, engaging, and modern education accessible to every Grade 6 to Grade 9 student across Ghana and beyond.
+            </p>
+
+            <!-- Positive Captions & Inspiring Highlights -->
+            <div class="space-y-3">
+              <div class="p-4 rounded-2xl bg-indigo-50 border-l-4 border-indigo-600">
+                <p class="font-display font-bold text-sm text-indigo-950">"Empowering Young Minds Through Technology & Passion"</p>
+                <p class="text-xs text-indigo-800 mt-1">Joseph believes every child deserves a patient teacher, crystal-clear explanations, and hands-on digital tools to unlock their greatness.</p>
+              </div>
+
+              <div class="p-4 rounded-2xl bg-pink-50 border-l-4 border-pink-600">
+                <p class="font-display font-bold text-sm text-pink-950">"A Dedicated Mentor Building Future Leaders"</p>
+                <p class="text-xs text-pink-800 mt-1">Through creativity, discipline, and kindness, Joseph Asiedu Amoah transforms complex GES topics in Computing, English, Maths, and Science into joyful learning moments.</p>
+              </div>
+
+              <div class="p-4 rounded-2xl bg-amber-50 border-l-4 border-amber-500">
+                <p class="font-display font-bold text-sm text-amber-950">"Excellence, Innovation & Heart"</p>
+                <p class="text-xs text-amber-900 mt-1">Celebrating hard work every week—because when students are encouraged and guided with love, there is no limit to what they can achieve!</p>
+              </div>
+            </div>
+
+            <div class="pt-3 border-t border-slate-100 flex flex-wrap gap-2">
+              <span class="px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-bold">#InspiringEducator</span>
+              <span class="px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-bold">#GESCurriculum</span>
+              <span class="px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-bold">#DigitalGhana</span>
+              <span class="px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-bold">#JosephAsieduAmoah</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </div>
+
+  <!-- FULLSCREEN SLIDESHOW MODAL FOR POWERPOINT SIMULATOR -->
+  <div id="ppt-fullscreen-modal" class="hidden fixed inset-0 z-50 bg-slate-950 flex flex-col justify-between p-6 sm:p-12 text-white">
+    <div class="flex justify-between items-center">
+      <span id="ppt-fs-counter" class="text-xs font-bold uppercase tracking-wider text-amber-400">Slide 1 of 2</span>
+      <button onclick="togglePptSlideshow()" class="px-4 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-xs font-bold">Exit Slideshow (ESC)</button>
+    </div>
+    <div id="ppt-fs-content" class="max-w-4xl mx-auto w-full rounded-3xl p-10 sm:p-16 bg-gradient-to-br from-indigo-600 to-purple-700 shadow-2xl space-y-6">
+      <h2 id="ppt-fs-title" class="font-display font-extrabold text-3xl sm:text-5xl"></h2>
+      <p id="ppt-fs-body" class="text-lg sm:text-2xl whitespace-pre-line leading-relaxed opacity-95"></p>
+    </div>
+    <div class="flex justify-center gap-4">
+      <button onclick="navFsSlide(-1)" class="px-5 py-2.5 rounded-xl bg-white/15 hover:bg-white/25 font-bold text-sm"><i class="fa-solid fa-arrow-left mr-1"></i> Previous</button>
+      <button onclick="navFsSlide(1)" class="px-5 py-2.5 rounded-xl bg-amber-400 text-slate-950 font-extrabold text-sm">Next <i class="fa-solid fa-arrow-right ml-1"></i></button>
+    </div>
+  </div>
+
+  <script>
+    /* ============================================================================
+       LEARNING WITH JOSEPH - COMPLETE APPLICATION STATE & GES CURRICULUM ENGINE
+       ============================================================================ */
+
+    const ADMIN_USERNAME = "LEARNING WITH JOSEPH";
+    const ADMIN_PASSWORD = "792007Khing##";
+
+    // Comprehensive GES Curriculum Data (Grades 6 - 9)
+    const GES_CURRICULUM = [
+      {
+        subject: "English",
+        color: "indigo",
+        icon: "fa-book-open",
+        desc: "Reading, Spelling, Letter Writing, Synonyms & Antonyms",
+        topics: [
+          {
+            id: "eng-reading",
+            title: "Reading Comprehension & Critical Thinking",
+            script: "Welcome to English Reading with Joseph! When reading any passage, first scan the title and topic sentences to identify the main idea. Look for context clues around unfamiliar words, and distinguish between facts and the author's opinion.",
+            points: ["Identify main idea & supporting details", "Use context clues for new vocabulary", "Summarize paragraphs in your own words", "Answer inferential questions accurately"],
+            question: "What is the best strategy to understand an unfamiliar word while reading a passage?",
+            options: ["Use context clues in surrounding sentences", "Skip the entire page immediately", "Only count the letters in the word", "Ignore the main idea of the story"],
+            answerIndex: 0
+          },
+          {
+            id: "eng-spelling",
+            title: "Spelling Rules & Commonly Misspelled Words",
+            script: "Let us master English Spelling! Remember key patterns: I before E except after C, such as in believe and receive. Also pay close attention to double consonants in words like accommodation, necessary, and tomorrow.",
+            points: ["I before E except after C (Receive, Believe)", "Silent letters (Knight, Psychology, Receipt)", "Double consonants (Necessary, Accommodation)", "Break long words into syllables"],
+            question: "Which of the following words is spelled correctly?",
+            options: ["Accommodation", "Acomodation", "Accomodation", "Acommodation"],
+            answerIndex: 0
+          },
+          {
+            id: "eng-letters",
+            title: "Formal & Informal Letter Writing",
+            script: "In GES English, Letter Writing has two main forms. Formal letters go to officials like Headteachers or Directors; they have two addresses, a formal salutation like Dear Sir or Madam, a clear heading, and end with Yours faithfully. Informal letters are written to friends and family with one address and a warm tone.",
+            points: ["Formal: Two addresses + Heading + Yours faithfully", "Informal: One address + Friendly tone + Yours sincerely", "Clear introduction, body paragraphs & conclusion", "Proper punctuation and date format"],
+            question: "How many addresses does a Formal Letter have in the GES curriculum?",
+            options: ["Two addresses (Writer's and Recipient's)", "Zero addresses", "Only the recipient's phone number", "Four addresses"],
+            answerIndex: 0
+          },
+          {
+            id: "eng-syn-ant",
+            title: "Synonyms and Antonyms Mastery",
+            script: "Synonyms are words with the same or nearly the same meaning, such as Diligent and Hardworking, or Enormous and Huge. Antonyms are words with opposite meanings, such as Generous and Stingy, or Victory and Defeat.",
+            points: ["Synonyms = Similar meaning (Brave / Courageous)", "Antonyms = Opposite meaning (Ancient / Modern)", "Enriches essays and oral speech", "Tested heavily in BECE English"],
+            question: "Which word is an ANTONYM (opposite) of 'Generous'?",
+            options: ["Stingy", "Kind", "Helpful", "Charitable"],
+            answerIndex: 0
+          }
+        ]
+      },
+      {
+        subject: "Computing (ICT)",
+        color: "cyan",
+        icon: "fa-desktop",
+        desc: "GES ICT: Productivity Software, Hardware, Internet & Coding",
+        topics: [
+          {
+            id: "ict-word",
+            title: "Word Processing (MS Word) & Formatting",
+            script: "According to the GES Computing syllabus, Word Processing software like Microsoft Word allows us to create, edit, format, and print text documents. Key tools include Font styles, Bold, Italics, Underline, Alignment, and Bulleted lists.",
+            points: ["Create & edit letters, reports, and essays", "Text formatting: Bold (Ctrl+B), Italic (Ctrl+I)", "Paragraph alignment & line spacing", "Try it live in Dashboard 2: ICT Software Lab!"],
+            question: "Which keyboard shortcut is used to make selected text BOLD in MS Word?",
+            options: ["Ctrl + B", "Ctrl + U", "Ctrl + Z", "Ctrl + P"],
+            answerIndex: 0
+          },
+          {
+            id: "ict-ppt",
+            title: "Presentation Software (PowerPoint)",
+            script: "Presentation software such as Microsoft PowerPoint is used to design visual slideshows for teaching, business, and seminars. A great presentation uses concise bullet points, clear slide themes, and smooth transitions.",
+            points: ["Organizes ideas into visual slides", "Supports themes, images, and animations", "Slideshow mode (F5) displays fullscreen", "Practice building slides in Dashboard 2!"],
+            question: "What is the main purpose of Presentation Software like PowerPoint?",
+            options: ["Creating visual slideshows to present information", "Calculating payroll taxes automatically", "Repairing damaged computer motherboards", "Browsing offline radio stations"],
+            answerIndex: 0
+          },
+          {
+            id: "ict-excel",
+            title: "Electronic Spreadsheets (Excel & Formulas)",
+            script: "Electronic Spreadsheets organize data into rows and columns. The intersection of a row and a column is called a Cell, such as A1 or B2. Formulas always begin with an equals sign, like equals SUM of B1 to B5.",
+            points: ["Rows (numbers) & Columns (letters) form Cells", "Formulas always start with '=' (e.g., =SUM(A1:A4))", "Used for student grades, budgets & charts", "Test formulas live in Dashboard 2!"],
+            question: "Which symbol MUST every formula begin with in a Spreadsheet?",
+            options: ["Equals sign (=)", "Hash sign (#)", "Dollar sign ($)", "At symbol (@)"],
+            answerIndex: 0
+          },
+          {
+            id: "ict-cyber",
+            title: "Hardware, Internet & Digital Citizenship",
+            script: "A computer system combines Hardware—physical parts like CPU, RAM, and Monitor—with Software. When using the Internet, practice good Digital Citizenship: protect your passwords, avoid cyberbullying, and verify online information.",
+            points: ["Input, Processing (CPU), Output & Storage devices", "System Software vs Application Software", "Safe browsing & strong password protection", "Respecting copyright and online ethics"],
+            question: "Which component is known as the 'brain' of the computer that processes instructions?",
+            options: ["Central Processing Unit (CPU)", "Monitor Screen", "Keyboard", "Printer"],
+            answerIndex: 0
+          }
+        ]
+      },
+      {
+        subject: "Mathematics",
+        color: "emerald",
+        icon: "fa-square-root-variable",
+        desc: "Numbers, Algebra, Geometry, Ratios & Data Handling",
+        topics: [
+          {
+            id: "math-algebra",
+            title: "Algebraic Expressions & Linear Equations",
+            script: "In GES Mathematics, Algebra uses letters called variables to represent unknown numbers. To solve a linear equation like 2x plus 4 equals 14, subtract 4 from both sides to get 2x equals 10, then divide by 2 so x equals 5.",
+            points: ["Group like terms together carefully", "Balance both sides of an equation", "Substitute your answer back to verify", "Applies to real-life problem solving"],
+            question: "Solve for x:  3x + 5 = 20",
+            options: ["x = 5", "x = 15", "x = 3", "x = 25"],
+            answerIndex: 0
+          },
+          {
+            id: "math-geometry",
+            title: "Angles, Triangles & Circle Geometry",
+            script: "Let us explore Geometry! Angles on a straight line add up to 180 degrees. The interior angles of any triangle also sum to 180 degrees, while angles around a complete point sum to 360 degrees.",
+            points: ["Angles on a straight line = 180°", "Sum of angles in a triangle = 180°", "Angles around a point = 360°", "Area of circle = πr²"],
+            question: "Two angles in a triangle are 60° and 70°. What is the third angle?",
+            options: ["50°", "180°", "90°", "40°"],
+            answerIndex: 0
+          }
+        ]
+      },
+      {
+        subject: "Science",
+        color: "purple",
+        icon: "fa-flask-vial",
+        desc: "Diversity of Matter, Cycles, Systems & Forces/Energy",
+        topics: [
+          {
+            id: "sci-matter",
+            title: "Elements, Compounds & Mixtures",
+            script: "In Integrated Science, Matter exists as elements, compounds, or mixtures. An element contains one type of atom, like Oxygen. A compound forms when elements chemically combine, like Water. A mixture combines substances physically, like salt water.",
+            points: ["Elements: Pure substances (Gold, Oxygen)", "Compounds: Chemically bonded (H2O, CO2)", "Mixtures: Physically combined (Air, Soil)", "Separation methods: Filtration & Distillation"],
+            question: "Water (H2O) is formed when Hydrogen and Oxygen chemically combine. Water is a:",
+            options: ["Compound", "Element", "Metal", "Magnetic field"],
+            answerIndex: 0
+          },
+          {
+            id: "sci-energy",
+            title: "Forms of Energy & Photosynthesis",
+            script: "Energy cannot be created or destroyed, only transformed from one form to another. Green plants transform light energy from the sun into chemical energy during Photosynthesis using chlorophyll, water, and carbon dioxide.",
+            points: ["Solar, Kinetic, Potential & Electrical energy", "Photosynthesis requires Sunlight & Chlorophyll", "Produces Glucose and Oxygen gas", "Conservation of energy in daily life"],
+            question: "Which green pigment in plant leaves traps sunlight for photosynthesis?",
+            options: ["Chlorophyll", "Hemoglobin", "Melanin", "Keratin"],
+            answerIndex: 0
+          }
+        ]
+      },
+      {
+        subject: "Social Studies",
+        color: "amber",
+        icon: "fa-earth-africa",
+        desc: "Environment, Governance, Citizenship & Development",
+        topics: [
+          {
+            id: "soc-gov",
+            title: "Our Constitution & Democratic Governance",
+            script: "Social Studies teaches us how Ghana is governed under the 1992 Constitution. Power is separated among three arms of government: the Executive, the Legislature, and the Judiciary, ensuring checks, balances, and human rights.",
+            points: ["1992 Fourth Republican Constitution", "Three arms: Executive, Legislature, Judiciary", "Fundamental Human Rights & Civic Duties", "Promoting peace and national unity"],
+            question: "Which arm of government is responsible for making laws in Ghana?",
+            options: ["The Legislature (Parliament)", "The Judiciary", "The Electoral Commission", "The Fire Service"],
+            answerIndex: 0
+          }
+        ]
+      },
+      {
+        subject: "History",
+        color: "rose",
+        icon: "fa-landmark",
+        desc: "Pre-Colonial Kingdoms, Independence & Nation Builders",
+        topics: [
+          {
+            id: "hist-indep",
+            title: "Ghana's Road to Independence (1957)",
+            script: "Ghana made history on 6th March 1957 as the first sub-Saharan African nation to gain independence from British colonial rule. Led by Dr. Kwame Nkrumah and the Big Six, the Gold Coast became the sovereign nation of Ghana.",
+            points: ["6th March 1957: Independence Day", "Dr. Kwame Nkrumah: First Prime Minister & President", "Role of the Big Six & UGCC / CPP", "Preserving cultural heritage & patriotism"],
+            question: "On what exact date did Ghana gain independence from colonial rule?",
+            options: ["6th March 1957", "1st July 1960", "24th February 1966", "4th June 1979"],
+            answerIndex: 0
+          }
+        ]
+      },
+      {
+        subject: "Creative Art & Design",
+        color: "pink",
+        icon: "fa-palette",
+        desc: "Elements of Design, Visual Arts & Performing Arts",
+        topics: [
+          {
+            id: "art-design",
+            title: "Elements & Principles of Design",
+            script: "Creative Art and Design develops our imagination! The basic elements of design include Line, Shape, Color, Texture, and Space. Artists combine these using principles like Balance, Contrast, Rhythm, and Harmony to create Kente patterns, sculptures, and music.",
+            points: ["Elements: Line, Shape, Form, Color, Texture", "Principles: Balance, Contrast, Unity, Rhythm", "Traditional Ghanaian Kente & Adinkra symbols", "Creative problem solving through design"],
+            question: "Which of the following is a basic ELEMENT of design?",
+            options: ["Line and Color", "Photosynthesis", "Long Division", "Keyboard Shortcut"],
+            answerIndex: 0
+          }
+        ]
+      }
+    ];
+
+    // Default Seed Data
+    const DEFAULT_STUDENTS = [
+      { id: "LWJ-G8-1001", name: "Ama Mensah", grade: "Grade 8", password: "STU-8821", points: 420 },
+      { id: "LWJ-G9-2045", name: "Kofi Owusu", grade: "Grade 9", password: "STU-4910", points: 365 },
+      { id: "LWJ-G7-3312", name: "Abena Osei", grade: "Grade 7", password: "STU-7734", points: 290 },
+      { id: "LWJ-G6-4109", name: "Yaw Boateng", grade: "Grade 6", password: "STU-5519", points: 215 }
+    ];
+
+    const DEFAULT_LOGS = [
+      { time: "Just now", user: "Ama Mensah (LWJ-G8-1001)", action: "Completed English Assignment: Formal Letter Writing (+50 pts)", type: "quiz" },
+      { time: "12 mins ago", user: "Kofi Owusu (LWJ-G9-2045)", action: "Practiced Spreadsheets Formula =SUM() in ICT Lab (+30 pts)", type: "ict" },
+      { time: "28 mins ago", user: "Abena Osei (LWJ-G7-3312)", action: "Watched Science Video & Loud Audio: Elements & Compounds (+25 pts)", type: "video" }
+    ];
+
+    // App State
+    let state = {
+      students: [],
+      logs: [],
+      customTopics: [],
+      sotw: { id: "LWJ-G8-1001", name: "Ama Mensah", grade: "Grade 8", points: 420 },
+      currentUser: null, // { role: 'admin' | 'student', data: ... }
+      selectedGrade: "Grade 8",
+      selectedSubject: "English",
+      activeTopic: null,
+      videoWatched: false,
+      lastGeneratedCreds: null,
+      pptSlides: [
+        { title: "Importance of Computing in Ghana", body: "• Enhances research and digital literacy\n• Connects students to global knowledge\n• Builds future software engineers", theme: "from-indigo-600 to-purple-700 text-white" },
+        { title: "GES ICT Practical Skills", body: "• Word Processing (MS Word)\n• Presentation Design (PowerPoint)\n• Data Analysis (Spreadsheets)", theme: "from-emerald-600 to-teal-700 text-white" }
+      ],
+      currentSlideIdx: 0,
+      excelData: [
+        ["English", "42", "45", "=SUM(B1:C1)"],
+        ["Mathematics", "38", "44", "=SUM(B2:C2)"],
+        ["Computing (ICT)", "48", "49", "=SUM(B3:C3)"],
+        ["Science", "40", "41", "=SUM(B4:C4)"]
+      ]
+    };
+
+    // Load & Save Persistence
+    function loadState() {
+      try {
+        const savedStudents = localStorage.getItem("lwj_students");
+        const savedLogs = localStorage.getItem("lwj_logs");
+        const savedCustom = localStorage.getItem("lwj_custom_topics");
+        const savedSotw = localStorage.getItem("lwj_sotw");
+
+        state.students = savedStudents ? JSON.parse(savedStudents) : [...DEFAULT_STUDENTS];
+        state.logs = savedLogs ? JSON.parse(savedLogs) : [...DEFAULT_LOGS];
+        state.customTopics = savedCustom ? JSON.parse(savedCustom) : [];
+        if (savedSotw) state.sotw = JSON.parse(savedSotw);
+      } catch (e) {
+        state.students = [...DEFAULT_STUDENTS];
+        state.logs = [...DEFAULT_LOGS];
+      }
+      updateSotwBanners();
+    }
+
+    function saveState() {
+      localStorage.setItem("lwj_students", JSON.stringify(state.students));
+      localStorage.setItem("lwj_logs", JSON.stringify(state.logs));
+      localStorage.setItem("lwj_custom_topics", JSON.stringify(state.customTopics));
+      localStorage.setItem("lwj_sotw", JSON.stringify(state.sotw));
+    }
+
+    // Toast Notification (Never use alert())
+    function showToast(message, type = "info") {
+      const container = document.getElementById("toast-container");
+      const toast = document.createElement("div");
+      const colors = {
+        success: "bg-emerald-600 text-white border-emerald-400",
+        error: "bg-rose-600 text-white border-rose-400",
+        info: "bg-slate-900 text-white border-indigo-500",
+        points: "bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 border-amber-300 font-extrabold"
+      };
+      toast.className = `pointer-events-auto px-4 py-3 rounded-2xl shadow-xl border text-xs sm:text-sm font-bold flex items-center gap-2.5 animate-slide-up ${colors[type] || colors.info}`;
+      toast.innerHTML = `<i class="fa-solid ${type === 'points' ? 'fa-star' : type === 'error' ? 'fa-circle-exclamation' : 'fa-circle-check'}"></i><span>${message}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = "0";
+        toast.style.transform = "translateY(-8px)";
+        toast.style.transition = "all 0.3s ease";
+        setTimeout(() => toast.remove(), 300);
+      }, 3600);
+    }
+
+    // Track Every Moment for Admin Surveillance
+    function logActivity(actorName, actionText, type = "info") {
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      state.logs.unshift({
+        time: timeStr,
+        user: actorName,
+        action: actionText,
+        type
+      });
+      if (state.logs.length > 80) state.logs.pop();
+      saveState();
+      if (state.currentUser && state.currentUser.role === "admin") {
+        renderAdminDashboard();
+      }
+    }
+
+    // Award Points to Student
+    function awardPoints(pts, reason) {
+      if (!state.currentUser || state.currentUser.role !== "student") return;
+      const stu = state.students.find(s => s.id === state.currentUser.data.id);
+      if (stu) {
+        stu.points += pts;
+        state.currentUser.data.points = stu.points;
+        document.getElementById("header-student-points").textContent = stu.points;
+        showToast(`+${pts} Points Earned! ${reason}`, "points");
+        logActivity(`${stu.name} (${stu.id})`, `${reason} (+${pts} pts)`, "points");
+
+        // Update SOTW if this student now leads
+        if (stu.points > state.sotw.points) {
+          state.sotw = { id: stu.id, name: stu.name, grade: stu.grade, points: stu.points };
+          updateSotwBanners();
+        }
+        saveState();
+      }
+    }
+
+    function updateSotwBanners() {
+      const label = `${state.sotw.name} (${state.sotw.grade})`;
+      const ptsLabel = `${state.sotw.points} Points`;
+      const elAuthName = document.getElementById("auth-sotw-name");
+      const elAuthPts = document.getElementById("auth-sotw-pts");
+      if (elAuthName) elAuthName.textContent = label;
+      if (elAuthPts) elAuthPts.textContent = `${ptsLabel} Earned`;
+
+      const elBannerName = document.getElementById("banner-sotw-name");
+      const elBannerPts = document.getElementById("banner-sotw-points");
+      if (elBannerName) elBannerName.textContent = label;
+      if (elBannerPts) elBannerPts.textContent = ptsLabel;
+
+      const elDash3Name = document.getElementById("dash3-sotw-name");
+      const elDash3Pts = document.getElementById("dash3-sotw-pts");
+      if (elDash3Name) elDash3Name.textContent = label;
+      if (elDash3Pts) elDash3Pts.textContent = `${ptsLabel} Earned This Week`;
+
+      const elAdminStat = document.getElementById("admin-stat-sotw");
+      const elAdminDisp = document.getElementById("admin-sotw-display");
+      if (elAdminStat) elAdminStat.textContent = state.sotw.name;
+      if (elAdminDisp) elAdminDisp.textContent = `${label} • ${ptsLabel}`;
+    }
+
+    /* ============================================================================
+       AUTHENTICATION & ROLE ROUTING
+       ============================================================================ */
+    function switchAuthTab(tab) {
+      ["student-login", "student-register", "admin-login"].forEach(t => {
+        document.getElementById(`form-${t}`).classList.add("hidden");
+        const btn = document.getElementById(`tab-${t}`);
+        btn.classList.remove("bg-white", "text-indigo-600", "shadow-sm");
+        btn.classList.add("text-slate-600");
+      });
+      document.getElementById(`form-${tab}`).classList.remove("hidden");
+      const activeBtn = document.getElementById(`tab-${tab}`);
+      activeBtn.classList.add("bg-white", "text-indigo-600", "shadow-sm");
+      activeBtn.classList.remove("text-slate-600");
+    }
+
+    function handleStudentRegister(e) {
+      e.preventDefault();
+      const fullName = document.getElementById("reg-name").value.trim();
+      const grade = document.querySelector('input[name="reg-grade"]:checked').value;
+      if (!fullName) return;
+
+      const gradeCode = grade.replace("Grade ", "G");
+      const randomNum = Math.floor(1000 + Math.random() * 9000);
+      const specialUsername = `LWJ-${gradeCode}-${randomNum}`;
+      const specialPassword = `JOSEPH-${Math.floor(1000 + Math.random() * 9000)}`;
+
+      const newStudent = {
+        id: specialUsername,
+        name: fullName,
+        grade: grade,
+        password: specialPassword,
+        points: 20
+      };
+
+      state.students.push(newStudent);
+      state.lastGeneratedCreds = newStudent;
+      saveState();
+
+      document.getElementById("gen-username").textContent = specialUsername;
+      document.getElementById("gen-password").textContent = specialPassword;
+      document.getElementById("generated-credentials-box").classList.remove("hidden");
+
+      logActivity(`${fullName} (${specialUsername})`, `Registered new ${grade} student account`, "register");
+      showToast("Special Student Username & Password generated!", "success");
+    }
+
+    function copyGeneratedCredentials() {
+      if (!state.lastGeneratedCreds) return;
+      const text = `Learning with Joseph Credentials:\nUsername: ${state.lastGeneratedCreds.id}\nPassword: ${state.lastGeneratedCreds.password}`;
+      const temp = document.createElement("textarea");
+      temp.value = text;
+      document.body.appendChild(temp);
+      temp.select();
+      document.execCommand("copy");
+      document.body.removeChild(temp);
+      showToast("Credentials copied to clipboard!", "success");
+    }
+
+    function loginWithGenerated() {
+      if (!state.lastGeneratedCreds) return;
+      enterStudentSession(state.lastGeneratedCreds);
+    }
+
+    function handleStudentLogin(e) {
+      e.preventDefault();
+      const u = document.getElementById("login-student-user").value.trim().toUpperCase();
+      const p = document.getElementById("login-student-pass").value.trim();
+
+      const found = state.students.find(s => s.id.toUpperCase() === u && s.password === p);
+      if (!found) {
+        showToast("Invalid Student Username or Password. Try Demo Login or register a new ID!", "error");
+        return;
+      }
+      enterStudentSession(found);
+    }
+
+    function quickDemoLogin() {
+      const demo = state.students[0];
+      enterStudentSession(demo);
+    }
+
+    function handleAdminLogin(e) {
+      e.preventDefault();
+      const u = document.getElementById("login-admin-user").value.trim();
+      const p = document.getElementById("login-admin-pass").value.trim();
+
+      if (u === ADMIN_USERNAME && p === ADMIN_PASSWORD) {
+        state.currentUser = { role: "admin", data: { name: "Joseph Asiedu Amoah" } };
+        document.getElementById("auth-screen").classList.add("hidden");
+        document.getElementById("student-app").classList.add("hidden");
+        document.getElementById("admin-app").classList.remove("hidden");
+        logActivity("ADMIN (Joseph Asiedu Amoah)", "Logged into Admin Home Control Center", "admin");
+        renderAdminDashboard();
+        showToast("Welcome back, Joseph! Admin Control Center unlocked.", "success");
+      } else {
+        showToast("Incorrect Admin Username or Password.", "error");
+      }
+    }
+
+    function enterStudentSession(studentObj, isAdminPreview = false) {
+      state.currentUser = { role: "student", data: studentObj, isAdminPreview };
+      state.selectedGrade = studentObj.grade || "Grade 8";
+
+      document.getElementById("auth-screen").classList.add("hidden");
+      document.getElementById("admin-app").classList.add("hidden");
+      document.getElementById("student-app").classList.remove("hidden");
+
+      document.getElementById("header-student-name").textContent = studentObj.name;
+      document.getElementById("header-student-id").textContent = studentObj.id;
+      document.getElementById("header-student-grade").textContent = state.selectedGrade;
+      document.getElementById("header-student-points").textContent = studentObj.points;
+      document.getElementById("header-student-avatar").textContent = studentObj.name.charAt(0).toUpperCase();
+
+      if (isAdminPreview) {
+        document.getElementById("return-admin-btn").classList.remove("hidden");
+      } else {
+        document.getElementById("return-admin-btn").classList.add("hidden");
+        awardPoints(10, "Daily Login Bonus");
+      }
+
+      switchStudentDashboard(1);
+      selectGrade(state.selectedGrade);
+      renderExcelGrid();
+      renderPptThumbnails();
+    }
+
+    function previewStudentModeFromAdmin() {
+      const demo = state.students[0];
+      logActivity("ADMIN (Joseph)", "Previewed Student Dashboards", "admin");
+      enterStudentSession(demo, true);
+    }
+
+    function returnToAdminHome() {
+      stopAudioNarration();
+      state.currentUser = { role: "admin", data: { name: "Joseph Asiedu Amoah" } };
+      document.getElementById("student-app").classList.add("hidden");
+      document.getElementById("admin-app").classList.remove("hidden");
+      renderAdminDashboard();
+    }
+
+    function logout() {
+      stopAudioNarration();
+      if (state.currentUser && state.currentUser.role === "student" && !state.currentUser.isAdminPreview) {
+        logActivity(`${state.currentUser.data.name} (${state.currentUser.data.id})`, "Logged out of the app", "logout");
+      }
+      state.currentUser = null;
+      document.getElementById("student-app").classList.add("hidden");
+      document.getElementById("admin-app").classList.add("hidden");
+      document.getElementById("auth-screen").classList.remove("hidden");
+    }
+
+    /* ============================================================================
+       ADMIN CONTROL CENTER LOGIC
+       ============================================================================ */
+    function renderAdminDashboard() {
+      document.getElementById("admin-stat-students").textContent = state.students.length;
+      document.getElementById("admin-stat-moments").textContent = state.logs.length;
+
+      let baseTopicsCount = GES_CURRICULUM.reduce((acc, s) => acc + s.topics.length, 0);
+      document.getElementById("admin-stat-lessons").textContent = baseTopicsCount + state.customTopics.length;
+
+      // Render Activity Feed
+      const feed = document.getElementById("admin-activity-feed");
+      feed.innerHTML = state.logs.map(item => `
+        <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200/80 text-xs space-y-1">
+          <div class="flex items-center justify-between">
+            <span class="font-extrabold text-indigo-700">${item.user}</span>
+            <span class="text-[10px] font-mono text-slate-400">${item.time}</span>
+          </div>
+          <p class="text-slate-700 font-medium">${item.action}</p>
+        </div>
+      `).join("");
+
+      // Render Student Roster
+      const roster = document.getElementById("admin-student-list");
+      const sorted = [...state.students].sort((a, b) => b.points - a.points);
+      roster.innerHTML = sorted.map(s => `
+        <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-2 text-xs">
+          <div class="min-w-0">
+            <p class="font-bold text-slate-900 truncate">${s.name} <span class="text-indigo-600">(${s.grade})</span></p>
+            <p class="font-mono text-[10px] text-slate-500">ID: ${s.id} | Pass: ${s.password}</p>
+          </div>
+          <div class="flex items-center gap-1.5 shrink-0">
+            <span class="px-2 py-1 rounded-lg bg-amber-100 text-amber-900 font-extrabold">${s.points} pts</span>
+            <button onclick="declareSpecificSotw('${s.id}')" title="Declare Student of the Week" class="p-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white">
+              <i class="fa-solid fa-crown"></i>
+            </button>
+          </div>
+        </div>
+      `).join("");
+
+      updateSotwBanners();
+    }
+
+    function handleAdminPostContent(e) {
+      e.preventDefault();
+      const grade = document.getElementById("post-grade").value;
+      const subject = document.getElementById("post-subject").value;
+      const title = document.getElementById("post-topic").value.trim();
+      const script = document.getElementById("post-script").value.trim();
+      const question = document.getElementById("post-question").value.trim();
+      const options = [
+        document.getElementById("post-opt-a").value.trim(),
+        document.getElementById("post-opt-b").value.trim(),
+        document.getElementById("post-opt-c").value.trim(),
+        document.getElementById("post-opt-d").value.trim()
+      ];
+
+      const newLesson = {
+        id: "custom-" + Date.now(),
+        grade,
+        subject,
+        title: `[NEW] ${title}`,
+        script,
+        points: [
+          `Posted by Teacher Joseph for ${grade}`,
+          "Watch & listen to loud audio narration",
+          "Complete the assignment below for +50 pts",
+          "Aligned with GES Curriculum Standards"
+        ],
+        question,
+        options,
+        answerIndex: 0
+      };
+
+      state.customTopics.unshift(newLesson);
+      saveState();
+      logActivity("ADMIN (Joseph)", `Published new ${grade} ${subject} lesson: "${title}"`, "admin");
+      renderAdminDashboard();
+      e.target.reset();
+      showToast(`Published "${title}" to ${grade} ${subject}!`, "success");
+    }
+
+    function autoDeclareTopStudent() {
+      if (state.students.length === 0) return;
+      const top = [...state.students].sort((a, b) => b.points - a.points)[0];
+      declareSpecificSotw(top.id);
+    }
+
+    function declareSpecificSotw(studentId) {
+      const stu = state.students.find(s => s.id === studentId);
+      if (!stu) return;
+      state.sotw = { id: stu.id, name: stu.name, grade: stu.grade, points: stu.points };
+      saveState();
+      updateSotwBanners();
+      logActivity("ADMIN (Joseph)", `Declared ${stu.name} (${stu.grade}) as Student of the Week!`, "admin");
+      showToast(`${stu.name} is now officially Student of the Week!`, "points");
+    }
+
+    function clearActivityLogs() {
+      state.logs = [];
+      saveState();
+      renderAdminDashboard();
+    }
+
+    /* ============================================================================
+       STUDENT DASHBOARD SWITCHING & LEARNING HUB (GRADES 6-9)
+       ============================================================================ */
+    function switchStudentDashboard(num) {
+      [1, 2, 3].forEach(n => {
+        document.getElementById(`student-dash-${n}`).classList.add("hidden");
+        const btn = document.getElementById(`nav-dash-${n}`);
+        btn.classList.remove("bg-gradient-to-r", "from-indigo-600", "to-purple-600", "text-white", "shadow-md");
+        btn.classList.add("text-slate-600");
+      });
+      document.getElementById(`student-dash-${num}`).classList.remove("hidden");
+      const active = document.getElementById(`nav-dash-${num}`);
+      active.classList.add("bg-gradient-to-r", "from-indigo-600", "to-purple-600", "text-white", "shadow-md");
+      active.classList.remove("text-slate-600");
+
+      if (num === 3) {
+        renderLeaderboard();
+      }
+      if (state.currentUser && state.currentUser.role === "student" && !state.currentUser.isAdminPreview) {
+        const dashNames = { 1: "Learning Hub", 2: "ICT Software Lab", 3: "Awards & About Joseph" };
+        logActivity(`${state.currentUser.data.name} (${state.currentUser.data.id})`, `Opened Dashboard ${num}: ${dashNames[num]}`, "nav");
+      }
+    }
+
+    function selectGrade(grade) {
+      state.selectedGrade = grade;
+      document.getElementById("selected-grade-label").textContent = grade;
+      document.getElementById("header-student-grade").textContent = grade;
+
+      document.querySelectorAll(".grade-btn").forEach(btn => {
+        if (btn.dataset.grade === grade) {
+          btn.classList.add("border-indigo-600", "bg-indigo-50", "text-indigo-900", "shadow-sm");
+          btn.classList.remove("border-slate-200");
+        } else {
+          btn.classList.remove("border-indigo-600", "bg-indigo-50", "text-indigo-900", "shadow-sm");
+          btn.classList.add("border-slate-200");
+        }
+      });
+
+      renderSubjectsGrid();
+      selectSubject(state.selectedSubject);
+    }
+
+    function renderSubjectsGrid() {
+      const grid = document.getElementById("subjects-grid");
+      const colorMap = {
+        indigo: "from-indigo-500 to-blue-600",
+        cyan: "from-cyan-500 to-teal-600",
+        emerald: "from-emerald-500 to-green-600",
+        purple: "from-purple-500 to-violet-600",
+        amber: "from-amber-500 to-orange-600",
+        rose: "from-rose-500 to-red-600",
+        pink: "from-pink-500 to-fuchsia-600"
+      };
+
+      grid.innerHTML = GES_CURRICULUM.map(sub => {
+        const isSelected = sub.subject === state.selectedSubject;
+        return `
+          <button onclick="selectSubject('${sub.subject}')" class="text-left p-4 rounded-2xl transition-all border-2 ${isSelected ? 'border-slate-900 shadow-lg scale-[1.02]' : 'border-transparent shadow-sm hover:shadow-md'} bg-white flex items-start gap-3.5">
+            <div class="w-11 h-11 rounded-2xl bg-gradient-to-br ${colorMap[sub.color]} text-white flex items-center justify-center text-lg shrink-0 shadow">
+              <i class="fa-solid ${sub.icon}"></i>
+            </div>
+            <div class="min-w-0">
+              <h4 class="font-display font-extrabold text-sm text-slate-900">${sub.subject}</h4>
+              <p class="text-[11px] text-slate-500 line-clamp-2 mt-0.5">${sub.desc}</p>
+            </div>
+          </button>
+        `;
+      }).join("");
+    }
+
+    function selectSubject(subjectName) {
+      state.selectedSubject = subjectName;
+      renderSubjectsGrid();
+
+      const subObj = GES_CURRICULUM.find(s => s.subject === subjectName) || GES_CURRICULUM[0];
+      document.getElementById("active-subject-badge").textContent = `${state.selectedGrade} • ${subObj.subject}`;
+      document.getElementById("active-subject-title").textContent = `${subObj.subject} Topics`;
+      document.getElementById("active-subject-icon").className = `fa-solid ${subObj.icon} text-2xl text-indigo-600`;
+
+      // Combine Admin-posted custom topics for this Grade/Subject + built-in GES topics
+      const customMatches = state.customTopics.filter(ct => ct.subject === subjectName && ct.grade === state.selectedGrade);
+      const allTopics = [...customMatches, ...subObj.topics];
+
+      const list = document.getElementById("topics-list");
+      list.innerHTML = allTopics.map((t, idx) => `
+        <button onclick='startLesson(${JSON.stringify(t).replace(/'/g, "&#39;")})' class="w-full text-left p-3.5 rounded-2xl border border-slate-200 hover:border-indigo-500 hover:bg-indigo-50/60 transition flex items-center justify-between gap-3 group">
+          <div class="flex items-center gap-3 min-w-0">
+            <span class="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-700 font-display font-extrabold text-xs flex items-center justify-center shrink-0 group-hover:bg-indigo-600 group-hover:text-white transition">${idx + 1}</span>
+            <div class="min-w-0">
+              <p class="font-bold text-xs sm:text-sm text-slate-900 truncate">${t.title}</p>
+              <p class="text-[11px] text-slate-500"><i class="fa-solid fa-video text-pink-500 mr-1"></i> Video + Loud Audio + Quiz</p>
+            </div>
+          </div>
+          <i class="fa-solid fa-circle-play text-xl text-indigo-500 group-hover:scale-110 transition"></i>
+        </button>
+      `).join("");
+    }
+
+    /* ============================================================================
+       INTERACTIVE VIDEO & MAXIMUM LOUD AUDIO ENGINE + POST-VIDEO ASSIGNMENT
+       ============================================================================ */
+    let progressTimer = null;
+
+    function startLesson(topic) {
+      state.activeTopic = topic;
+      state.videoWatched = false;
+
+      document.getElementById("lesson-grade-sub-tag").textContent = `${state.selectedGrade} • ${state.selectedSubject}`;
+      document.getElementById("lesson-player-title").textContent = topic.title;
+      document.getElementById("video-caption-text").textContent = topic.script;
+
+      const kpGrid = document.getElementById("video-key-points");
+      kpGrid.innerHTML = (topic.points || []).map(pt => `
+        <div class="bg-white/10 backdrop-blur-sm border border-white/15 rounded-xl px-3 py-2 text-xs font-semibold text-amber-100 flex items-center gap-2">
+          <i class="fa-solid fa-check text-emerald-400"></i>
+          <span>${pt}</span>
+        </div>
+      `).join("");
+
+      // Lock assignment until video completes
+      document.getElementById("assignment-locked-msg").classList.remove("hidden");
+      document.getElementById("assignment-unlocked-box").classList.add("hidden");
+      document.getElementById("assignment-feedback").classList.add("hidden");
+
+      // Animate Video Progress Bar
+      clearInterval(progressTimer);
+      let pct = 0;
+      const bar = document.getElementById("video-progress-bar");
+      bar.style.width = "0%";
+      document.getElementById("video-status-text").textContent = "Playing Video & Loud Audio Lesson...";
+
+      progressTimer = setInterval(() => {
+        pct += 4;
+        bar.style.width = `${Math.min(pct, 100)}%`;
+        if (pct >= 100) {
+          clearInterval(progressTimer);
+          markVideoWatched();
+        }
+      }, 450);
+
+      // Trigger Automatic Maximum Loud Audio Narration
+      playLoudAudioNarration(`${state.selectedGrade} ${state.selectedSubject}. Topic: ${topic.title}. ${topic.script}`);
+
+      if (state.currentUser && state.currentUser.role === "student" && !state.currentUser.isAdminPreview) {
+        logActivity(`${state.currentUser.data.name} (${state.currentUser.data.id})`, `Started Video & Loud Audio Lesson: ${topic.title}`, "video");
+      }
+    }
+
+    function playLoudAudioNarration(text) {
+      try {
+        // Web Audio API Boosted Chime so user immediately hears crisp loud sound
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (AudioCtx) {
+          const ctx = new AudioCtx();
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = "triangle";
+          osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
+          osc.frequency.exponentialRampToValueAtTime(783.99, ctx.currentTime + 0.18); // G5
+          gain.gain.setValueAtTime(0.85, ctx.currentTime); // High volume
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.36);
+        }
+
+        // SpeechSynthesis at MAXIMUM VOLUME (1.0)
+        if ("speechSynthesis" in window) {
+          window.speechSynthesis.cancel();
+          const utterance = new SpeechSynthesisUtterance(text);
+          utterance.volume = 1.0; // Automatically maximum loudness
+          utterance.rate = 0.96;
+          utterance.pitch = 1.05;
+
+          const viz = document.getElementById("audio-visualizer");
+          utterance.onstart = () => {
+            if (viz) viz.classList.remove("opacity-40");
+          };
+          utterance.onend = () => {
+            if (viz) viz.classList.add("opacity-40");
+          };
+          window.speechSynthesis.speak(utterance);
+        }
+      } catch (e) {
+        // Graceful fallback if browser blocks autoplay audio before interaction
+      }
+    }
+
+    function replayLoudAudio() {
+      if (!state.activeTopic) {
+        showToast("Please select a topic first to play its loud audio lesson!", "info");
+        return;
+      }
+      playLoudAudioNarration(`${state.activeTopic.title}. ${state.activeTopic.script}`);
+      showToast("Playing audio at 100% Maximum Volume!", "success");
+    }
+
+    function stopAudioNarration() {
+      if ("speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
+      const viz = document.getElementById("audio-visualizer");
+      if (viz) viz.classList.add("opacity-40");
+    }
+
+    function markVideoWatched() {
+      if (!state.activeTopic) {
+        showToast("Select a topic on the left first!", "info");
+        return;
+      }
+      clearInterval(progressTimer);
+      document.getElementById("video-progress-bar").style.width = "100%";
+      document.getElementById("video-status-text").textContent = "Lesson Completed! Assignment Unlocked Below.";
+
+      if (!state.videoWatched) {
+        state.videoWatched = true;
+        awardPoints(25, `Watched Lesson: ${state.activeTopic.title}`);
+      }
+
+      // Unlock & Render Post-Video Assignment
+      document.getElementById("assignment-locked-msg").classList.add("hidden");
+      document.getElementById("assignment-unlocked-box").classList.remove("hidden");
+      document.getElementById("assignment-question-text").textContent = state.activeTopic.question;
+
+      // Shuffle options while preserving correct answer tracking
+      const correctText = state.activeTopic.options[state.activeTopic.answerIndex];
+      const shuffled = [...state.activeTopic.options].sort(() => Math.random() - 0.5);
+
+      const grid = document.getElementById("assignment-options-grid");
+      grid.innerHTML = shuffled.map(opt => `
+        <button onclick='submitAssignmentAnswer(${JSON.stringify(opt)}, ${JSON.stringify(correctText)})' class="p-3.5 rounded-2xl border-2 border-slate-200 bg-white hover:border-purple-600 hover:bg-purple-50 text-left text-xs sm:text-sm font-bold text-slate-800 transition">
+          ${opt}
+        </button>
+      `).join("");
+    }
+
+    function submitAssignmentAnswer(chosen, correct) {
+      const fb = document.getElementById("assignment-feedback");
+      fb.classList.remove("hidden");
+
+      if (chosen === correct) {
+        fb.className = "p-3.5 rounded-2xl text-xs font-bold bg-emerald-100 text-emerald-900 border border-emerald-300";
+        fb.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 mr-1.5"></i> Excellent work! "${correct}" is correct! You earned +50 points!`;
+        playLoudAudioNarration("Congratulations! That is the correct answer. You have earned fifty points!");
+        awardPoints(50, `Passed Assignment: ${state.activeTopic.title}`);
+      } else {
+        fb.className = "p-3.5 rounded-2xl text-xs font-bold bg-rose-100 text-rose-900 border border-rose-300";
+        fb.innerHTML = `<i class="fa-solid fa-circle-xmark text-rose-600 mr-1.5"></i> Not quite! The correct answer is "${correct}". Try another topic to keep earning points!`;
+        playLoudAudioNarration(`Good try! The correct answer is ${correct}.`);
+      }
+    }
+
+    /* ============================================================================
+       DASHBOARD 2: INTERACTIVE ICT SOFTWARE LAB (WORD, POWERPOINT, EXCEL)
+       ============================================================================ */
+    function switchIctApp(app) {
+      ["word", "ppt", "excel"].forEach(a => {
+        document.getElementById(`ict-app-${a}`).classList.add("hidden");
+        const tab = document.getElementById(`ict-tab-${a}`);
+        tab.className = "px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-indigo-100 text-slate-700 font-bold text-xs sm:text-sm flex items-center gap-2 transition";
+      });
+      document.getElementById(`ict-app-${app}`).classList.remove("hidden");
+      const activeColors = {
+        word: "bg-blue-600 text-white shadow",
+        ppt: "bg-orange-600 text-white shadow",
+        excel: "bg-emerald-600 text-white shadow"
+      };
+      document.getElementById(`ict-tab-${app}`).className = `px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 transition ${activeColors[app]}`;
+    }
+
+    // MS Word Toolbar Commands
+    function execWordCmd(cmd, val = null) {
+      document.execCommand(cmd, false, val);
+      document.getElementById("word-editor-page").focus();
+    }
+
+    // PowerPoint Simulator Functions
+    function renderPptThumbnails() {
+      const container = document.getElementById("ppt-thumbnails");
+      if (!container) return;
+      container.innerHTML = state.pptSlides.map((s, idx) => `
+        <button onclick="selectPptSlide(${idx})" class="w-full text-left p-3 rounded-xl border-2 ${idx === state.currentSlideIdx ? 'border-orange-500 bg-orange-50' : 'border-slate-200 bg-white'} transition">
+          <span class="text-[10px] font-extrabold text-orange-600">SLIDE ${idx + 1}</span>
+          <p class="font-bold text-xs text-slate-900 truncate mt-0.5">${s.title || 'Untitled Slide'}</p>
+        </button>
+      `).join("");
+
+      const curr = state.pptSlides[state.currentSlideIdx];
+      if (curr) {
+        document.getElementById("ppt-slide-title").value = curr.title;
+        document.getElementById("ppt-slide-body").value = curr.body;
+        document.getElementById("ppt-canvas").className = `rounded-2xl bg-gradient-to-br ${curr.theme} p-8 sm:p-12 min-h-[300px] shadow-lg flex flex-col justify-center space-y-4 transition-all`;
+      }
+    }
+
+    function selectPptSlide(idx) {
+      state.currentSlideIdx = idx;
+      renderPptThumbnails();
+    }
+
+    function updateCurrentSlide() {
+      const curr = state.pptSlides[state.currentSlideIdx];
+      if (!curr) return;
+      curr.title = document.getElementById("ppt-slide-title").value;
+      curr.body = document.getElementById("ppt-slide-body").value;
+      renderPptThumbnails();
+    }
+
+    function addPptSlide() {
+      state.pptSlides.push({
+        title: `Slide ${state.pptSlides.length + 1}: New GES Topic`,
+        body: "• Click here to type your presentation points\n• Add clear examples for your class",
+        theme: "from-indigo-600 to-purple-700 text-white"
+      });
+      state.currentSlideIdx = state.pptSlides.length - 1;
+      renderPptThumbnails();
+    }
+
+    function setPptTheme(themeClass) {
+      state.pptSlides[state.currentSlideIdx].theme = themeClass;
+      renderPptThumbnails();
+    }
+
+    function togglePptSlideshow() {
+      const modal = document.getElementById("ppt-fullscreen-modal");
+      modal.classList.toggle("hidden");
+      if (!modal.classList.contains("hidden")) {
+        updateFsSlide();
+      }
+    }
+
+    function updateFsSlide() {
+      const curr = state.pptSlides[state.currentSlideIdx];
+      document.getElementById("ppt-fs-counter").textContent = `Slide ${state.currentSlideIdx + 1} of ${state.pptSlides.length}`;
+      document.getElementById("ppt-fs-title").textContent = curr.title;
+      document.getElementById("ppt-fs-body").textContent = curr.body;
+      document.getElementById("ppt-fs-content").className = `max-w-4xl mx-auto w-full rounded-3xl p-10 sm:p-16 bg-gradient-to-br ${curr.theme} shadow-2xl space-y-6`;
+    }
+
+    function navFsSlide(dir) {
+      state.currentSlideIdx = (state.currentSlideIdx + dir + state.pptSlides.length) % state.pptSlides.length;
+      updateFsSlide();
+    }
+
+    // Spreadsheets (Excel) Simulator Functions
+    function evaluateExcelCell(val) {
+      if (typeof val !== "string" || !val.startsWith("=")) return val;
+      try {
+        const upper = val.toUpperCase().trim();
+        const sumMatch = upper.match(/^=SUM\(([A-D])(\d):([A-D])(\d)\)$/);
+        if (sumMatch) {
+          const colMap = { A: 0, B: 1, C: 2, D: 3 };
+          const c1 = colMap[sumMatch[1]], r1 = parseInt(sumMatch[2]) - 1;
+          const c2 = colMap[sumMatch[3]], r2 = parseInt(sumMatch[4]) - 1;
+          let sum = 0;
+          for (let r = Math.min(r1, r2); r <= Math.max(r1, r2); r++) {
+            for (let c = Math.min(c1, c2); c <= Math.max(c1, c2); c++) {
+              const num = parseFloat(state.excelData[r]?.[c]);
+              if (!isNaN(num)) sum += num;
+            }
+          }
+          return sum;
+        }
+        return "ERR";
+      } catch {
+        return "ERR";
+      }
+    }
+
+    function renderExcelGrid() {
+      const tbody = document.getElementById("excel-tbody");
+      if (!tbody) return;
+      tbody.innerHTML = state.excelData.map((row, rIdx) => `
+        <tr>
+          <td class="border border-slate-200 bg-slate-50 text-center font-bold text-slate-500 p-2">${rIdx + 1}</td>
+          ${row.map((cell, cIdx) => {
+            const displayVal = evaluateExcelCell(cell);
+            const isFormula = typeof cell === "string" && cell.startsWith("=");
+            return `
+              <td class="border border-slate-200 p-0">
+                <input
+                  value="${displayVal}"
+                  data-raw="${cell}"
+                  onfocus="this.value = this.dataset.raw"
+                  onblur="updateExcelCell(${rIdx}, ${cIdx}, this.value)"
+                  class="w-full px-3 py-2 outline-none focus:bg-emerald-50 font-medium ${isFormula ? 'text-emerald-700 font-bold bg-emerald-50/40' : 'text-slate-800'}"
+                />
+              </td>
+            `;
+          }).join("")}
+        </tr>
+      `).join("");
+    }
+
+    function updateExcelCell(r, c, newVal) {
+      state.excelData[r][c] = newVal;
+      renderExcelGrid();
+    }
+
+    function recalculateSheet() {
+      renderExcelGrid();
+      showToast("Spreadsheet formulas recalculated!", "success");
+    }
+
+    function submitIctPractice(softwareName) {
+      awardPoints(30, `Completed ICT Lab Practical: ${softwareName}`);
+    }
+
+    /* ============================================================================
+       DASHBOARD 3: LEADERBOARD RENDERING
+       ============================================================================ */
+    function renderLeaderboard() {
+      const list = document.getElementById("student-leaderboard-list");
+      const sorted = [...state.students].sort((a, b) => b.points - a.points);
+      list.innerHTML = sorted.map((s, idx) => {
+        const medals = ["🥇", "🥈", "🥉"];
+        const badge = medals[idx] || `#${idx + 1}`;
+        const isMe = state.currentUser && state.currentUser.data.id === s.id;
+        return `
+          <div class="p-3.5 rounded-2xl border ${isMe ? 'border-indigo-500 bg-indigo-50/70' : 'border-slate-200 bg-slate-50/60'} flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <span class="w-8 h-8 rounded-xl bg-white shadow-sm flex items-center justify-center font-extrabold text-sm">${badge}</span>
+              <div>
+                <p class="font-bold text-sm text-slate-900">${s.name} ${isMe ? '<span class="text-[10px] px-2 py-0.5 rounded-full bg-indigo-600 text-white ml-1">YOU</span>' : ''}</p>
+                <p class="text-xs text-slate-500">${s.grade} • <span class="font-mono">${s.id}</span></p>
+              </div>
+            </div>
+            <span class="font-display font-extrabold text-sm text-amber-600">${s.points} pts</span>
+          </div>
+        `;
+      }).join("");
+    }
+
+    // Initialize Application on Load
+    window.addEventListener("DOMContentLoaded", () => {
+      loadState();
+    });
+  </script>
+</body>
+</html>
